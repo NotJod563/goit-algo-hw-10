@@ -1,34 +1,58 @@
 import numpy as np
-import scipy.integrate as integrate
+import matplotlib.pyplot as plt
+import scipy.integrate as spi
 
-# Функція, яку будемо інтегрувати
-def func(x):
-    return np.sin(x)
+# Визначення функції для інтегрування
+def f(x):
+    return x ** 2
+
+# Межі інтегрування
+a = 0
+b = 2
 
 # Метод Монте-Карло для обчислення інтегралу
-def monte_carlo_integration(func, a, b, num_points=10000):
+def monte_carlo_integration(f, a, b, num_points):
     x_random = np.random.uniform(a, b, num_points)
-    func_values = func(x_random)
-    integral = (b - a) * np.mean(func_values)
-    return integral
+    y_random = f(x_random)
+    integral_value = (b - a) * np.mean(y_random)
+    return integral_value
 
-# Використання функції quad з бібліотеки SciPy
-def scipy_quad_integration(func, a, b):
-    result, _ = integrate.quad(func, a, b)
-    return result
+# Кількість точок для методу Монте-Карло
+num_points = 10000
 
-# Інтервали інтегрування
-a = 0
-b = np.pi
+# Обчислення інтегралу за допомогою методу Монте-Карло
+mc_result = monte_carlo_integration(f, a, b, num_points)
 
-# Обчислення за методом Монте-Карло
-mc_result = monte_carlo_integration(func, a, b)
-print(f"Результат за допомогою методу Монте-Карло: {mc_result}")
-
-# Аналітичне або обчислене за допомогою SciPy значення
-quad_result = scipy_quad_integration(func, a, b)
-print(f"Результат за допомогою функції quad з SciPy: {quad_result}")
+# Обчислення інтегралу за допомогою SciPy (функція quad)
+quad_result, quad_error = spi.quad(f, a, b)
 
 # Порівняння результатів
-error = abs(mc_result - quad_result)
-print(f"Різниця між результатами: {error}")
+print(f"Результат за допомогою методу Монте-Карло: {mc_result}")
+print(f"Результат за допомогою функції quad з SciPy: {quad_result}")
+print(f"Різниця між результатами: {abs(mc_result - quad_result)}")
+
+# Створення графіка
+x = np.linspace(-0.5, 2.5, 400)
+y = f(x)
+
+fig, ax = plt.subplots()
+
+# Малювання функції
+ax.plot(x, y, 'r', linewidth=2)
+
+# Заповнення області під кривою (інтегральна площа)
+ix = np.linspace(a, b)
+iy = f(ix)
+ax.fill_between(ix, iy, color='gray', alpha=0.3)
+
+# Налаштування графіка
+ax.set_xlim([x[0], x[-1]])
+ax.set_ylim([0, max(y) + 0.1])
+ax.set_xlabel('x')
+ax.set_ylabel('f(x)')
+ax.axvline(x=a, color='gray', linestyle='--')
+ax.axvline(x=b, color='gray', linestyle='--')
+ax.set_title(f'Інтегрування f(x) = x^2 від {a} до {b}')
+
+plt.grid()
+plt.show()
